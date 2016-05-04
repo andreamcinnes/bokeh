@@ -30,24 +30,29 @@ ydr = DataRange1d()
 
 plot = Plot(x_range=xdr, y_range=ydr, min_border=20, plot_height=300, border_fill_color='aliceblue')
 
-title = Label(x=0, y=0, text=["Iris plot"], x_units='screen', y_units='screen')
-plot.add_layout(title, 'above')
-
-
 circle = Circle(
     x="petal_length", y="petal_width", size=10,
     fill_color="color", fill_alpha=0.2, line_color="color"
 )
 plot.add_glyph(source, circle)
 
-xaxis = LinearAxis(axis_label="petal length", bounds=(1,7), major_tick_in=0)
+xaxis = LinearAxis(bounds=(1,7), major_tick_in=0)
 plot.add_layout(xaxis, 'below')
 
 yaxis = LinearAxis(bounds=(0,2.5), major_tick_in=0)
 plot.add_layout(yaxis, 'left')
 
-left_title = Label(x=0, y=0, text=["Petal width"], x_units='screen', y_units='screen', angle=90, angle_units='deg')
+title = Label(x=0, y=0, text=["Iris plot"], x_units='screen', y_units='screen')
+plot.add_layout(title, 'above')
+
+left_title = Label(x=0, y=0, text=["Petal width"], x_units='screen', y_units='screen', angle=np.pi/3)
 plot.add_layout(left_title, 'left')
+
+below_title = Label(x=0, y=0, text=["Petal length"], x_units='screen', y_units='screen')
+plot.add_layout(below_title, 'below')
+
+right_title = Label(x=0, y=0, text=["Right label"], x_units='screen', y_units='screen')
+plot.add_layout(right_title, 'right')
 
 misc = Label(x=1, y=1, text=["Some stuff"], angle=np.pi/3)
 plot.add_layout(misc)

@@ -106,11 +106,21 @@ class LabelView extends Renderer.View
       ctx.save()
 
       panel_offset_y = 0
+      panel_offset_x = 0
       if @model.panel?
-        panel_offset_y = @model.panel._bottom._value
+        panel_offset_x = @model.panel._left._value
 
-      ctx.rotate(@mget('angle'))
-      ctx.translate(@sx[i] + @_x_offset[i], @sy[i] - @_y_offset[i] - panel_offset_y)
+        side = @mget('layout_location')
+        if side == 'above' or side == 'below'
+          panel_offset_y = @model.panel._bottom._value
+        if side == 'left' or side == 'right'
+          panel_offset_y = @model.panel._bottom._value / 2
+
+        ctx.rotate(@mget('angle'))
+        ctx.translate(
+          @sx[i] + @_x_offset[i] + panel_offset_x,
+          @sy[i] - @_y_offset[i] - panel_offset_y
+        )
 
       ctx.beginPath()
       ctx.rect(@x_shift[i], @y_shift[i], @width[i], @height[i])
@@ -193,21 +203,43 @@ class LabelView extends Renderer.View
 
     return extent
 
+  _get_full: () ->
+    side = @mget('layout_location')
+    if side == 'above' or side == 'below'
+      return @plot_view.canvas._width._value
+    if side == 'left' or side == 'right'
+      return @plot_view.canvas._height._value
+
   update_constraints: () ->
-    # If a label does not have a panel, then there's nothing to update
+    # If a label does not have a panel, 
+    # then there's nothing to update
+
     if @model.panel?
+      s = @model.document.solver()
+
       size = @_get_size()
+      full = @_get_full()
 
       if not @_last_size?
         @_last_size = -1
-      if size == @_last_size
+      if not @_last_full?
+        @_last_full = -1
+
+      if size == @_last_size and full == @_last_full
         return
+
       @_last_size = size
-      s = @model.document.solver()
       if @_size_constraint?
           s.remove_constraint(@_size_constraint)
       @_size_constraint = GE(@model._size, -size)
       s.add_constraint(@_size_constraint)
+
+      @_last_full = full
+      if @_full_constraint?
+          s.remove_constraint(@_full_constraint)
+      @_full_constraint = GE(@model._full, -full)
+      s.add_constraint(@_full_constraint)
+
 
 class Label extends Annotation.Model
   default_view: LabelView
