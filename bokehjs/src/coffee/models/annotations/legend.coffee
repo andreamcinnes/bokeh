@@ -105,22 +105,15 @@ class LegendView extends Renderer.View
     panel_offset_y = 0
     panel_offset_x = 0
     if @model.panel?
+      panel_offset_x = @model.panel._left._value
+
       side = @mget('layout_location')
-      if side == 'above'
-        panel_offset_y = -@model.panel._top._value + 1
-        panel_offset_x = @model.panel._left._value
-      if side == 'below'
+      if side == 'above' or side == 'below'
         panel_offset_y = -@model.panel._top._value
-        panel_offset_x = @model.panel._left._value
-      if side == 'left'
+      if side == 'left' or side == 'right'
         panel_offset_y = -@model.panel._top._value / 2
-        panel_offset_x = @model.panel._left._value
-      if side == 'right'
-        panel_offset_y = -@model.panel._top._value / 2
-        panel_offset_x = @model.panel._left._value - 1 
 
     ctx.translate(panel_offset_x, panel_offset_y)
-
     ctx.beginPath()
     ctx.rect(@box_coords[0], @box_coords[1], @legend_width, @legend_height)
 
