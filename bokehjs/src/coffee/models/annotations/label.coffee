@@ -106,13 +106,11 @@ class LabelView extends Renderer.View
       ctx.save()
 
       panel_offset_y = 0
-      panel_offset_x = 0
       if @model.panel?
         panel_offset_y = @model.panel._bottom._value
-        panel_offset_x = @model.panel._left._value
 
       ctx.rotate(@mget('angle'))
-      ctx.translate(@sx[i] + @_x_offset[i] + panel_offset_x, @sy[i] - @_y_offset[i] - panel_offset_y)
+      ctx.translate(@sx[i] + @_x_offset[i], @sy[i] - @_y_offset[i] - panel_offset_y)
 
       ctx.beginPath()
       ctx.rect(@x_shift[i], @y_shift[i], @width[i], @height[i])

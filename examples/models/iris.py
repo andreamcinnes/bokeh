@@ -42,7 +42,7 @@ plot.add_layout(title)
 
 title_2 = Label(
     x=plot.plot_width/2, y=0, text=["Iris plot paneled"], text_color='blue',
-    text_font_size='12pt', x_units='screen', y_units='screen',
+    text_font_size='12pt', x_units='screen', y_units='screen', text_align='center',
 )
 plot.add_layout(title_2, 'above')
 

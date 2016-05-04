@@ -4,6 +4,7 @@ Annotation = require "./annotation"
 Renderer = require "../renderers/renderer"
 p = require "../../core/properties"
 {get_text_height} = require "../../core/util/text"
+{GE} = require "../../core/layout/solver"
 
 class LegendView extends Renderer.View
   initialize: (options) ->
@@ -101,10 +102,27 @@ class LegendView extends Renderer.View
     ctx = @plot_view.canvas_view.ctx
     ctx.save()
 
+    panel_offset_y = 0
+    panel_offset_x = 0
+    if @model.panel?
+      side = @mget('layout_location')
+      if side == 'above'
+        panel_offset_y = -@model.panel._top._value + 1
+        panel_offset_x = @model.panel._left._value
+      if side == 'below'
+        panel_offset_y = -@model.panel._top._value
+        panel_offset_x = @model.panel._left._value
+      if side == 'left'
+        panel_offset_y = -@model.panel._top._value / 2
+        panel_offset_x = @model.panel._left._value
+      if side == 'right'
+        panel_offset_y = -@model.panel._top._value / 2
+        panel_offset_x = @model.panel._left._value - 1 
+
+    ctx.translate(panel_offset_x, panel_offset_y)
+
     ctx.beginPath()
-    ctx.rect(@box_coords[0], @box_coords[1],
-      @legend_width, @legend_height
-    )
+    ctx.rect(@box_coords[0], @box_coords[1], @legend_width, @legend_height)
 
     @visuals.background_fill.set_value(ctx)
     ctx.fill()
@@ -141,6 +159,51 @@ class LegendView extends Renderer.View
 
     ctx.restore()
 
+  _get_size: () ->
+    side = @mget('layout_location')
+    if side == 'above' or side == 'below'
+      return @legend_height
+    if side == 'left' or side == 'right'
+      return @legend_width
+
+  _get_full: () ->
+    side = @mget('layout_location')
+    if side == 'above' or side == 'below'
+      return @plot_view.canvas._width._value
+    if side == 'left' or side == 'right'
+      return @plot_view.canvas._height._value
+
+  update_constraints: () ->
+    # If a label does not have a panel, 
+    # then there's nothing to update
+
+    if @model.panel?
+      s = @model.document.solver()
+
+      @calc_dims()
+      size = @_get_size()
+      full = @_get_full()
+
+      if not @_last_size?
+        @_last_size = -1
+      if not @_last_full?
+        @_last_full = -1
+
+      if size == @_last_size and full == @_last_full
+        return
+
+      @_last_size = size
+      if @_size_constraint?
+          s.remove_constraint(@_size_constraint)
+      @_size_constraint = GE(@model._size, -size)
+      s.add_constraint(@_size_constraint)
+
+      @_last_full = full
+      if @_full_constraint?
+          s.remove_constraint(@_full_constraint)
+      @_full_constraint = GE(@model._full, -full)
+      s.add_constraint(@_full_constraint)
+
 class Legend extends Annotation.Model
   default_view: LegendView
 
@@ -167,6 +230,9 @@ class Legend extends Annotation.Model
     label_text_font_size: "10pt"
     label_text_baseline: "middle"
   }
+
+  get_constraints: () ->
+    return []
 
 module.exports =
   Model: Legend

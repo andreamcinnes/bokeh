@@ -22,7 +22,7 @@ source = ColumnDataSource(data=dict(x=x, y=y, y2=y2))
 xdr = DataRange1d()
 ydr = DataRange1d()
 
-plot = Plot(x_range=xdr, y_range=ydr, min_border=50, plot_width=800)
+plot = Plot(x_range=xdr, y_range=ydr, min_border=50, plot_width=800, plot_height=300)
 
 line_glyph = Line(x="x", y="y", line_color="navy", line_width=2, line_dash="dashed")
 line = plot.add_glyph(source, line_glyph)
@@ -32,6 +32,7 @@ circle = plot.add_glyph(source, circle)
 plot.add_layout(LinearAxis(), 'above')
 plot.add_layout(LinearAxis(), 'below')
 plot.add_layout(LinearAxis(), 'left')
+plot.add_layout(LinearAxis(), 'right')
 plot.add_layout(LinearAxis(), 'right')
 
 pan = PanTool()
@@ -45,8 +46,17 @@ from bokeh.core.enums import LegendLocation
 legend = Legend(legends=[("x=100px, y=150px", [line]), ("other", [circle])], location=(100, 150))
 plot.add_layout(legend)
 
-legend = Legend(legends=[("NEW ONE", [line]), ("other", [circle])], location='bottom_left')
+legend = Legend(legends=[("ABOVE ONE", [line]), ("other", [circle])], location=(0, 0))
 plot.add_layout(legend, 'above')
+
+legend = Legend(legends=[("LEFT ONE", [line]), ("other", [circle])], location=(0, 0))
+plot.add_layout(legend, 'left')
+
+#legend = Legend(legends=[("RIGHT", [line]), ("other", [circle])], location=(0, 0))
+#plot.add_layout(legend, 'right')
+
+legend = Legend(legends=[("BELOW ONE", [line]), ("other", [circle])], location=(0, 0))
+plot.add_layout(legend, 'below')
 
 doc = Document()
 doc.add_root(plot)
