@@ -1,12 +1,12 @@
 from __future__ import print_function
 
+import numpy as np
 from bokeh.util.browser import view
 from bokeh.document import Document
 from bokeh.embed import file_html
 from bokeh.models.glyphs import Circle
 from bokeh.models import (
-    Plot, DataRange1d, LinearAxis, Grid, ColumnDataSource, PanTool,
-    WheelZoomTool, Label, Button, VBox, CustomJS
+    Plot, DataRange1d, LinearAxis, Grid, ColumnDataSource, PanTool, WheelZoomTool, Label
 )
 from bokeh.resources import INLINE
 from bokeh.sampledata.iris import flowers
@@ -30,32 +30,9 @@ ydr = DataRange1d()
 
 plot = Plot(x_range=xdr, y_range=ydr, min_border=20, plot_height=300, border_fill_color='aliceblue')
 
-xaxis = LinearAxis(axis_label="petal length", bounds=(1,7), major_tick_in=0)
-plot.add_layout(xaxis, 'above')
+title = Label(x=0, y=0, text=["Iris plot"], x_units='screen', y_units='screen')
+plot.add_layout(title, 'above')
 
-xaxis_2 = LinearAxis(axis_label="petal length", bounds=(1,7), major_tick_in=0)
-plot.add_layout(xaxis_2, 'below')
-
-# Manually add title
-title = Label(x=1, y=1, text=["Iris plot plot"])
-plot.add_layout(title)
-
-title_2 = Label(
-    x=plot.plot_width/2, y=0, text=["Iris plot paneled"], text_color='blue',
-    text_font_size='12pt', x_units='screen', y_units='screen', text_align='center',
-)
-plot.add_layout(title_2, 'above')
-
-big_callback = CustomJS(args=dict(title=title_2, xaxis=xaxis), code="""
-    title.text_font_size='20pt'
-    xaxis.major_label_text_font_size='20pt'
-""")
-big_button = Button(label='big', callback=big_callback)
-small_callback = CustomJS(args=dict(title=title_2, xaxis=xaxis), code="""
-    title.text_font_size='10pt'
-    xaxis.major_label_text_font_size='10pt'
-""")
-small_button = Button(label='small', callback=small_callback)
 
 circle = Circle(
     x="petal_length", y="petal_width", size=10,
@@ -63,9 +40,17 @@ circle = Circle(
 )
 plot.add_glyph(source, circle)
 
+xaxis = LinearAxis(axis_label="petal length", bounds=(1,7), major_tick_in=0)
+plot.add_layout(xaxis, 'below')
 
-yaxis = LinearAxis(axis_label="petal width", bounds=(0,2.5), major_tick_in=0)
+yaxis = LinearAxis(bounds=(0,2.5), major_tick_in=0)
 plot.add_layout(yaxis, 'left')
+
+left_title = Label(x=0, y=0, text=["Petal width"], x_units='screen', y_units='screen', angle=90, angle_units='deg')
+plot.add_layout(left_title, 'left')
+
+misc = Label(x=1, y=1, text=["Some stuff"], angle=np.pi/3)
+plot.add_layout(misc)
 
 plot.add_layout(Grid(dimension=0, ticker=xaxis.ticker))
 plot.add_layout(Grid(dimension=1, ticker=yaxis.ticker))
@@ -73,7 +58,7 @@ plot.add_layout(Grid(dimension=1, ticker=yaxis.ticker))
 plot.add_tools(PanTool(), WheelZoomTool())
 
 doc = Document()
-doc.add_root(VBox(children=[big_button, small_button, plot]))
+doc.add_root(plot)
 
 if __name__ == "__main__":
     filename = "iris.html"
