@@ -736,6 +736,12 @@ class Plot extends LayoutDOM.Model
 
     logger.debug("Plot attached to document")
 
+    # Add panels for any side renderers
+    for side in ['above', 'below', 'left', 'right']
+      layout_renderers = @get(side)
+      for r in layout_renderers
+        r.add_panel()
+
   serializable_attributes: () ->
     attrs = super()
     if 'renderers' of attrs

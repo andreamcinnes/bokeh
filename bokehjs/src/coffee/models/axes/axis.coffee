@@ -421,7 +421,7 @@ class Axis extends GuideRenderer.Model
     @define_computed_property('dimension', (() -> @_dim), true)
     @define_computed_property('offsets', @_offsets, true)
 
-  _doc_attached: () ->
+  add_panel: () ->
     @panel = new SidePanel.Model()
     @panel.attach_document(@document)
 
