@@ -13,7 +13,7 @@ class Annotation extends Renderer.Model
   }
 
   @override {
-    level: 'annotation'
+    level:          'annotation'
   }
 
   @internal {
@@ -37,6 +37,8 @@ class Annotation extends Renderer.Model
     # Only called if renderer is in a side
     @panel = new SidePanel.Model()
     @panel.attach_document(@document)
+    # If the annotation is in a side panel, we need to set level to overlay, so it is visible.
+    @level = 'overlay'
 
 module.exports =
   Model: Annotation

@@ -105,8 +105,14 @@ class LabelView extends Renderer.View
     for i in [0...@_text.length]
       ctx.save()
 
+      panel_offset_y = 0
+      panel_offset_x = 0
+      if @model.panel?
+        panel_offset_y = @model.panel._bottom._value
+        panel_offset_x = @model.panel._left._value
+
       ctx.rotate(@mget('angle'))
-      ctx.translate(@sx[i] + @_x_offset[i], @sy[i] - @_y_offset[i])
+      ctx.translate(@sx[i] + @_x_offset[i] + panel_offset_x, @sy[i] - @_y_offset[i] - panel_offset_y)
 
       ctx.beginPath()
       ctx.rect(@x_shift[i], @y_shift[i], @width[i], @height[i])
@@ -177,9 +183,11 @@ class LabelView extends Renderer.View
     # TODO: This only returns the w/h of the last item in the list
     # Probably doesn't work if there's more than one label.
     for i in [0...@_text.length]
+      @visuals.text.set_vectorize(ctx, i)
       w = ctx.measureText(@_text[i]).width
       h = ctx.measureText(@_text[i]).ascent / 1.175
 
+    side = @mget('layout_location')
     if side == "above" or side == "below"
       extent += w*s + h*c
     else

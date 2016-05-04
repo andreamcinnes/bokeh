@@ -40,7 +40,7 @@ plot.add_layout(xaxis_2, 'below')
 title = Label(x=1, y=1, text=["Iris plot plot"])
 plot.add_layout(title)
 
-title_2 = Label(x=1, y=0, text=["Iris plot paneled"], text_color='blue', text_font_size='12pt')
+title_2 = Label(x=0, y=0, text=["Iris plot paneled"], text_color='blue', text_font_size='12pt', x_units='screen', y_units='screen')
 plot.add_layout(title_2, 'above')
 
 big_callback = CustomJS(args=dict(title=title_2, xaxis=xaxis), code="""
