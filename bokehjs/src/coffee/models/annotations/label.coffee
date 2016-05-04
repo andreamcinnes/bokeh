@@ -1,6 +1,9 @@
 _ = require "underscore"
 $ = require "jquery"
 
+{GE} = require "../../core/layout/solver"
+
+
 Annotation = require "./annotation"
 ColumnDataSource = require "../sources/column_data_source"
 Renderer = require "../renderers/renderer"
@@ -161,6 +164,44 @@ class LabelView extends Renderer.View
         .html(@_text[i])
         .css(div_style)
         .show()
+
+  _get_size: () ->
+    ctx = @plot_view.canvas_view.ctx
+    extent = 0
+
+    # This isn't going to work for other sides (see how axis does it)
+    angle = 0
+    c = Math.cos(angle)
+    s = Math.sin(angle)
+
+    # TODO: This only returns the w/h of the last item in the list
+    # Probably doesn't work if there's more than one label.
+    for i in [0...@_text.length]
+      w = ctx.measureText(@_text[i]).width
+      h = ctx.measureText(@_text[i]).ascent / 1.175
+
+    if side == "above" or side == "below"
+      extent += w*s + h*c
+    else
+      extent += w*c + h*s
+
+    return extent
+
+  update_constraints: () ->
+    # If a label does not have a panel, then there's nothing to update
+    if @model.panel?
+      size = @_get_size()
+
+      if not @_last_size?
+        @_last_size = -1
+      if size == @_last_size
+        return
+      @_last_size = size
+      s = @model.document.solver()
+      if @_size_constraint?
+          s.remove_constraint(@_size_constraint)
+      @_size_constraint = GE(@model._size, -size)
+      s.add_constraint(@_size_constraint)
 
 class Label extends Annotation.Model
   default_view: LabelView

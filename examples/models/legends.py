@@ -49,6 +49,10 @@ for location in LegendLocation:
 legend = Legend(legends=[("x=100px, y=150px", [line]), ("other", [circle])], location=(100, 150))
 plot.add_layout(legend)
 
+legend = Legend(legends=[("NEW ONE", [line]), ("other", [circle])])
+plot.add_layout(legend, 'right')
+
+
 doc = Document()
 doc.add_root(plot)
 

@@ -563,6 +563,10 @@ class PlotView extends Renderer.View
 
     s.update_variables(false)
 
+    for model_id, view of @renderer_views
+      if view.update_constraints?
+        view.update_constraints()
+
   resize: () =>
     @resize_width_height(true, false)
 
