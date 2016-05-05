@@ -902,27 +902,31 @@ class Plot extends LayoutDOM.Model
       last = @get('frame')
       for r in layout_renderers
         # Stack together the renderers
+        # gives us a padding between items - we don't want it for axes (they
+        # need to stick to side of plot, but we may want it for annotations)
+        padding = 0  
         if side == "above"
-          constraints.push(EQ(last.panel._top, [-1, r.panel._bottom]))
+          constraints.push(EQ(last.panel._top, [-1, r.panel._bottom], padding))
         if side == "below"
-          constraints.push(EQ(last.panel._bottom, [-1, r.panel._top]))
+          constraints.push(EQ(last.panel._bottom, [-1, r.panel._top], padding))
         if side == "left"
-          constraints.push(EQ(last.panel._left, [-1, r.panel._right]))
+          constraints.push(EQ(last.panel._left, [-1, r.panel._right], padding))
         if side == "right"
-          constraints.push(EQ(last.panel._right, [-1, r.panel._left]))
+          constraints.push(EQ(last.panel._right, [-1, r.panel._left], padding))
           console.log(last)
           console.log(r)
         last = r
       if layout_renderers.length != 0
         # Set panel extent to match the side renderers (e.g. axes)
+        # Extra 1 gives us a small dilation from edge of canvas
         if side == "above"
-          constraints.push(EQ(last.panel._top, [-1, @above_panel._top]))
+          constraints.push(EQ(last.panel._top, [-1, @above_panel._top], 1))
         if side == "below"
-          constraints.push(EQ(last.panel._bottom, [-1, @below_panel._bottom]))
+          constraints.push(EQ(last.panel._bottom, [-1, @below_panel._bottom], 1))
         if side == "left"
-          constraints.push(EQ(last.panel._left, [-1, @left_panel._left]))
+          constraints.push(EQ(last.panel._left, [-1, @left_panel._left], 1))
         if side == "right"
-          constraints.push(EQ(last.panel._right, [-1, @right_panel._right]))
+          constraints.push(EQ(last.panel._right, [-1, @right_panel._right], 1))
     return constraints
 
 module.exports =
