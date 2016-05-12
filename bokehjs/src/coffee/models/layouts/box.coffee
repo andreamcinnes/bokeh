@@ -1,6 +1,6 @@
 build_views = require "../../common/build_views"
 
-{Variable, WEAK_EQ, EQ, GE}  = require "../../core/layout/solver"
+{Strength, Variable, WEAK_EQ, EQ, GE}  = require "../../core/layout/solver"
 p = require "../../core/properties"
 
 LayoutDOM = require "./layout_dom"
@@ -13,20 +13,54 @@ class BoxView extends LayoutDOM.View
     super(options)
 
     children = @model.get_layoutable_children()
-    @views = {}
-    build_views(@views, children)
+    @child_views = {}
+    build_views(@child_views, children)
   
-    for own key, child_view of @views
+    for own key, child_view of @child_views
       @$el.append(child_view.$el)
 
     @bind_bokeh_events()
     @model.variables_updated()
+    @model.document.solver().trigger('resize')
 
 
   bind_bokeh_events: () ->
+    @listenTo(@model.document.solver(), 'resize', @render)
     @listenTo(@model.document.solver(), 'layout_update', () => @model.variables_updated())
     @listenTo(@model, 'change', @render)
 
+
+  render: () ->
+    @update_constraints()
+    left = @mget('dom_left')
+    top = @mget('dom_top')
+
+    # This is a hack - the 25 is half of the 50 that was subtracted from
+    # document when setting doc_width. This means that the root is positioned
+    # symetrically and the vertical scroll bar doesn't mess stuff up when it
+    # kicks in.
+    if @model._is_root?
+      left = left + 25
+
+    @$el.css({
+      position: 'absolute'
+      left: left
+      top: top
+      width: @model._width._value
+      height: @model._height._value
+      'margin-left': @model._whitespace_left._value
+      'margin-right': @model._whitespace_right._value
+      'margin-top': @model._whitespace_top._value
+      'margin-bottom': @model._whitespace_bottom._value
+    })
+
+  update_constraints: () ->
+    s = @model.document.solver()
+    height = 0
+    for own key, child_view of @child_views
+      height += child_view.el.scrollHeight
+    s.suggest_value(@model._height, height)
+    s.update_variables(false)
 
 class Box extends LayoutDOM.Model
   default_view: BoxView
@@ -67,7 +101,7 @@ class Box extends LayoutDOM.Model
   }
 
   @internal {
-    spacing:  [ p.Number, 6 ]
+    spacing:  [ p.Number, 10 ]
   }
 
   _ensure_origin_variables: (child) ->
@@ -482,6 +516,7 @@ class Box extends LayoutDOM.Model
   
   get_edit_variables: () ->
     edit_variables = []
+    edit_variables.push({edit_variable: @_height, strength: Strength.strong})
     # Go down the children to pick up any more constraints
     for child in @get_layoutable_children()
       edit_variables = edit_variables.concat(child.get_edit_variables())

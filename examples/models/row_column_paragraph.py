@@ -16,7 +16,7 @@ strip steak landjaeger drumstick prosciutto.
 
 layout = Column(
     Row(Column(Paragraph(text=text)), Column(Paragraph(text=text))),
-    Row(Column(Paragraph(text=text)), Column(Paragraph(text=text))),
+    Row(Column(Paragraph(text="Just a short paragraph")), Column(Paragraph(text=text))),
     Row(Paragraph(text=text)),
     Row(Column(Paragraph(text=text)), Column(Paragraph(text=text))),
 )

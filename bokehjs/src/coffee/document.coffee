@@ -1,10 +1,12 @@
 _ = require "underscore"
+$ = require "jquery"
 
 {Models} = require "./base"
 {EQ, Solver, Variable} = require "./core/layout/solver"
 {logger} = require "./core/logging"
 HasProps = require "./core/has_props"
 {is_ref} = require "./core/util/refs"
+
 
 class DocumentChangedEvent
   constructor : (@document) ->
@@ -87,7 +89,22 @@ class Document
     @_doc_height = new Variable()
     @_solver.add_edit_variable(@_doc_width)
     @_solver.add_edit_variable(@_doc_height)
-    
+    $(window).on("resize", $.proxy(@resize, @))
+
+  resize: () ->
+    logger.debug("resize: Document")
+    # The 50 is a hack for when the scroll bar kicks in
+    # when the page is allowed to extend - also see the 
+    # note in box.coffee
+    #
+    # TODO: We can't use window!
+    width = window.innerWidth - 50
+    height = window.innerHeight
+    @_solver.suggest_value(@_doc_width, width)
+    #@_solver.suggest_value(@_doc_height, height)
+    @_solver.update_variables()
+    @_solver.trigger('resize')
+
   solver: () ->
     @_solver
 
@@ -129,11 +146,12 @@ class Document
       root_vars = model.get_constrained_variables()
       if root_vars.width?
         @_solver.add_constraint(EQ(root_vars.width, @_doc_width))
-        @_solver.suggest_value(@_doc_width, window.innerWidth)
-      if root_vars.height?
-        @_solver.add_constraint(EQ(root_vars.height, @_doc_height))
-        @_solver.suggest_value(@_doc_height, window.innerHeight)
+      #if root_vars.height?
+      #  @_solver.add_constraint(EQ(root_vars.height, @_doc_height))
 
+      model._is_root = true
+
+    @resize()
     @_solver.update_variables()
 
   remove_root : (model) ->

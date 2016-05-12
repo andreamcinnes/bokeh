@@ -1,6 +1,6 @@
 _ = require "underscore"
 
-{Variable, EQ, GE, Strength}  = require "./solver"
+{Variable, Strength}  = require "./solver"
 Model = require "../../model"
 p = require "../properties"
 
