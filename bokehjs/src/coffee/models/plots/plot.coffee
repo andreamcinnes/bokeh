@@ -696,9 +696,6 @@ class Plot extends LayoutDOM.Model
       if not @get('min_border_right')?
         @set('min_border_right', min_border)
     
-    @_width = new Variable("plot_width")
-    @_height = new Variable("plot_height")
-
     logger.debug("Plot initialized")
 
   _doc_attached: () ->
@@ -827,6 +824,8 @@ class Plot extends LayoutDOM.Model
       min_border_left:   [ p.Number,   null                   ]
       min_border_bottom: [ p.Number,   null                   ]
       min_border_right:  [ p.Number,   null                   ]
+
+      grow:              [ p.Bool,     false                  ]
     }
 
   @override {
@@ -864,14 +863,14 @@ class Plot extends LayoutDOM.Model
     return children
 
   get_edit_variables: () ->
-    edit_variables = super()
+    edit_variables = []
     # Go down the children to pick up any more constraints
     for child in @get_layoutable_children()
       edit_variables = edit_variables.concat(child.get_edit_variables())
     return edit_variables
 
   get_constraints: () ->
-    constraints = super()
+    constraints = []
     constraints = constraints.concat(@_get_constant_constraints())
     constraints = constraints.concat(@_get_side_constraints())
     # Go down the children to pick up any more constraints
@@ -952,7 +951,16 @@ class Plot extends LayoutDOM.Model
     return constraints
 
   get_constrained_variables: () ->
-    {}
+    {
+      'width': @_width
+      'height': @_height
+      # insets from the edge that are whitespace (contain no pixels),
+      # this is used for spacing within a box.
+      'whitespace-top' : @_whitespace_top
+      'whitespace-bottom' : @_whitespace_bottom
+      'whitespace-left' : @_whitespace_left
+      'whitespace-right' : @_whitespace_right
+    }
 
 module.exports =
   get_size_for_available_space: get_size_for_available_space
