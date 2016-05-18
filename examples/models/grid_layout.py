@@ -54,6 +54,8 @@ plot4 = make_plot("y4", "black", left_axis=False, below_axis=False)
 
 slider = Slider(start=0, end=10, value=1, step=1, title="Stuff1")
 slider_2 = Slider(start=0, end=10, value=1, step=1, title="Stuff2")
+slider_3 = Slider(start=0, end=10, value=1, step=1, title="Stuff2")
+slider_4 = Slider(start=0, end=10, value=1, step=1, title="Stuff2")
 menu = [("Item 1", "item_1"), ("Item 2", "item_2"), None, ("Item 3", "item_3")]
 dropdown = Dropdown(label="Dropdown button", menu=menu)
 msg = """ Returns a tuple (plot, [obj1...objN]); the former can be added
@@ -93,9 +95,21 @@ doc = Document()
 #row2 = Row(children=[Column(children=[button, plot2])])
 #doc.add_root(Column(children=[row1, row2]))  # works
 
-#row1 = Row(children=[Column(children=[slider, plot1])])
-#row2 = Row(children=[Column(children=[button, plot2, plot4, slider_2])])
-#doc.add_root(Column(children=[row1, row2]))  # works
+row1 = Row(
+    children=[
+        Column(children=[slider, plot1]),
+        Column(children=[slider_2, plot2]),
+    ]
+)
+row2 = Row(
+    children=[
+        Column(children=[slider_3, plot3]),
+        Column(children=[slider_4, plot4]),
+    ]
+)
+#row2 = Row(children=[Column(children=[slider_2, plot2])])
+
+doc.add_root(Column(children=[row1, row2]))  # works
 
 
 if __name__ == "__main__":
