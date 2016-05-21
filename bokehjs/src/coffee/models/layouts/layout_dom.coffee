@@ -42,11 +42,14 @@ class LayoutDOMView extends BokehView
     #logger.debug("#{@model} _width_minus_right: #{@model._width_minus_right._value}, _height_minus_bottom: #{@model._height_minus_bottom._value}")
 
     @$el.css({
-      position: 'absolute'
+      #position: 'absolute'
+      position: 'relative'
       left: @model._dom_left._value
       top: @model._dom_top._value
-      width: @model._width._value
-      height: @model._height._value
+      #width: @model._width._value
+      #height: @model._height._value
+      width: @model.width
+      height: @model.height
     })
 
   update_constraints: () ->

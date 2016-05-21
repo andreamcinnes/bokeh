@@ -9,6 +9,13 @@ LayoutDOM = require "./layout_dom"
 class BoxView extends LayoutDOM.View
   className: "bk-grid"
 
+  render: () ->
+    s = @model.document.solver()
+    s.suggest_value(@model._width, @model.width)
+    s.suggest_value(@model._height, @model.height)
+    s.update_variables()
+    super()
+
 
 class Box extends LayoutDOM.Model
   default_view: BoxView
@@ -54,14 +61,16 @@ class Box extends LayoutDOM.Model
   
   get_edit_variables: () ->
     edit_variables = []
+    edit_variables.push({edit_variable: @_height, strength: Strength.strong})
+    edit_variables.push({edit_variable: @_width, strength: Strength.strong})
     for child in @get_layoutable_children()
       edit_variables = edit_variables.concat(child.get_edit_variables())
     return edit_variables
 
   get_constrained_variables: () ->
     {
-      'width' : @_width
-      'height' : @_height
+      #'width' : @_width
+      #'height' : @_height
       'box-equal-size-top' : @_box_equal_size_top
       'box-equal-size-bottom' : @_box_equal_size_bottom
       'box-equal-size-left' : @_box_equal_size_left
@@ -93,22 +102,25 @@ class Box extends LayoutDOM.Model
       @_test_layoutable(child)
 
       vars = child.get_constrained_variables()
+      var_keys = _.keys(vars)
 
       # Make total widget sizes fill the orthogonal direction
       rect = @_child_rect(vars)
       if @_horizontal
-        constraints.push(EQ(rect.height, [ -1, @_height ]))
+        if 'height' of vars
+          constraints.push(EQ(rect.height, [ -1, @_height ]))
       else
-        constraints.push(EQ(rect.width, [ -1, @_width ]))
+        if 'width' of vars
+          constraints.push(EQ(rect.width, [ -1, @_width ]))
 
       # Add equal-size constraint
       # - A child's "interesting area" (like the plot area) is the same size as the previous child 
       #   (a child can opt out of this by not returning the box-equal-size variables)
       if @_horizontal
-        if 'box-equal-size-left' of vars
+        if _.every(['box-equal-size-left', 'box-equal-size-right', 'width'], (x) -> x in var_keys)
           constraints.push(EQ([-1, vars['box-equal-size-left']], [-1, vars['box-equal-size-right']], vars['width'], @_child_equal_size_width))
       else
-        if 'box-equal-size-top' of vars
+        if _.every(['box-equal-size-top', 'box-equal-size-bottom', 'height'], (x) -> x in var_keys)
           constraints.push(EQ([-1, vars['box-equal-size-top']], [-1, vars['box-equal-size-bottom']], vars['height'], @_child_equal_size_height))
 
       # Pull child constraints up recursively
@@ -121,7 +133,8 @@ class Box extends LayoutDOM.Model
     for i in [1...children.length]
       next = @_info(children[i].get_constrained_variables())
       # Each child's start equals the previous child's end
-      constraints.push(EQ(last.span.start, last.span.size, [-1, next.span.start]))
+      if _.every(['width', 'height'], (x) -> x in var_keys)
+        constraints.push(EQ(last.span.start, last.span.size, [-1, next.span.start]))
       # The whitespace at end of one child + start of next must equal the box spacing. 
       # This must be a weak constraint because it can conflict with aligning the 
       # alignable edges in each child. Alignment is generally more important visually than spacing.
@@ -136,7 +149,8 @@ class Box extends LayoutDOM.Model
       total = @_width
     else
       total = @_height
-    constraints.push(EQ(last.span.start, last.span.size, [-1, total]))
+    if _.every(['width', 'height'], (x) -> x in var_keys)
+      constraints.push(EQ(last.span.start, last.span.size, [-1, total]))
 
     # align outermost edges in both dimensions
     constraints = constraints.concat(@_align_outer_edges_constraints(true)) # horizontal=true
@@ -163,8 +177,8 @@ class Box extends LayoutDOM.Model
     required_constrained_variables = [
       'origin-x',
       'origin-y',
-      'width',
-      'height',
+     # 'width',
+     # 'height',
       'whitespace-top',
       'whitespace-right',
       'whitespace-bottom',

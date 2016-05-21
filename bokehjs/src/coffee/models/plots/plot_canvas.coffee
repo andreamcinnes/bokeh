@@ -466,7 +466,7 @@ class PlotCanvasView extends Renderer.View
     @canvas_view.set_dims([width, height], true)
 
     @$el.css({
-      position: 'absolute'
+      #position: 'absolute'
       left: @model._dom_left._value
       top: @model._dom_top._value
       'width': @model._width._value

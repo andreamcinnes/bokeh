@@ -8,4 +8,13 @@
   position: relative;
   width: 100%;
   height: 100%;
+  // Start - fixed boxes do the right thing
+  .bk-grid-row, .bk-grid-column {
+    overflow: auto;
+  }
+  .bk-grid-row > div {
+    display: inline-block;
+    float: left;
+  }
+  // End - fixed boxes
 }
