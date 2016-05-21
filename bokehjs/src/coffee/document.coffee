@@ -120,8 +120,11 @@ class Document
 
     logger.debug("resize: Document -- #{width} x #{height}")
 
-    @_solver.suggest_value(@_doc_width, width)
-    @_solver.suggest_value(@_doc_height, height)
+    vars = root.get_constrained_variables()
+    if vars.width?
+      @_solver.suggest_value(@_doc_width, width)
+    if vars.height?
+      @_solver.suggest_value(@_doc_height, height)
 
     @_solver.update_variables(false)
     parent.css({

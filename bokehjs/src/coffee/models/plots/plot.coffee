@@ -14,6 +14,12 @@ PlotCanvas = require("./plot_canvas").Model
 class PlotView extends LayoutDOM.View
   className: "bk-plot-layout"
 
+  render: () ->
+    s = @model.document.solver()
+    s.suggest_value(@model._width, @model.plot_width)
+    s.suggest_value(@model._height, @model.plot_height)
+    s.update_variables()
+    super()
 
 class Plot extends LayoutDOM.Model
   type: 'Plot'
@@ -53,6 +59,8 @@ class Plot extends LayoutDOM.Model
 
   get_edit_variables: () ->
     edit_variables = []
+    edit_variables.push({edit_variable: @_height, strength: Strength.strong})
+    edit_variables.push({edit_variable: @_width, strength: Strength.strong})
     for child in @get_layoutable_children()
       edit_variables = edit_variables.concat(child.get_edit_variables())
     return edit_variables

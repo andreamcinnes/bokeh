@@ -103,8 +103,6 @@ class LayoutDOM extends Model
 
   get_constrained_variables: () ->
     {
-      'width': @_width
-      'height': @_height
       'whitespace-top' : @_whitespace_top
       'whitespace-bottom' : @_whitespace_bottom
       'whitespace-left' : @_whitespace_left
