@@ -314,8 +314,14 @@ class PlotCanvasView extends Renderer.View
     if rng.get('bounds')?
       min = rng.get('bounds')[0]
       max = rng.get('bounds')[1]
+      min_range = rng.get('bounds')[2]  # max_range would be max-min
 
       if reversed
+        if min_range?  # min_range comes first; min/max override in case of conflict
+          too_much_range = min_range - Math.abs(range_info['end'] - range_info['start'])
+          if too_much_range > 0
+            range_info['end'] -= 0.5 * too_much_range
+            range_info['start'] += 0.5 * too_much_range
         if min?
           if min >= range_info['end']
             range_info['end'] = min
@@ -327,6 +333,11 @@ class PlotCanvasView extends Renderer.View
             if is_panning?
               range_info['end'] = rng.get('end')
       else
+        if min_range?
+          too_much_range = min_range - Math.abs(range_info['end'] - range_info['start'])
+          if too_much_range > 0
+            range_info['start'] -= 0.5 * too_much_range
+            range_info['end'] += 0.5 * too_much_range
         if min?
           if min >= range_info['start']
             range_info['start'] = min

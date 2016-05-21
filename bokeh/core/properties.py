@@ -1392,7 +1392,8 @@ class MinMaxBounds(Either):
     Bounds are provided as a tuple of ``(min, max)`` so regardless of whether your range is
     increasing or decreasing, the first item should be the minimum value of the range and the
     second item should be the maximum. Setting min > max will result in a ``ValueError``.
-
+    A minimum zoom level can be given as a third element: ``(min, max, min_range)``.
+    
     Setting bounds to None will allow your plot to pan/zoom as far as you want. If you only
     want to constrain one end of the plot, you can set min or max to
     ``None`` e.g. ``DataRange1d(bounds=(None, 12))`` """
@@ -1402,12 +1403,15 @@ class MinMaxBounds(Either):
             types = (
                 Auto,
                 Tuple(Float, Float),
+                Tuple(Float, Float, Float),
                 Tuple(Datetime, Datetime),
+                Tuple(Datetime, Datetime, Float),  # min_range in milisecs
             )
         else:
             types = (
                 Auto,
                 Tuple(Float, Float),
+                Tuple(Float, Float, Float),
             )
         super(MinMaxBounds, self).__init__(*types, default=default, help=help)
 

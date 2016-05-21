@@ -56,7 +56,8 @@ class Range1d(Range):
     Bounds are provided as a tuple of ``(min, max)`` so regardless of whether your range is
     increasing or decreasing, the first item should be the minimum value of the range and the
     second item should be the maximum. Setting min > max will result in a ``ValueError``.
-
+    A minimum zoom level can be given as a third element: ``(min, max, min_range)``.
+    
     By default, bounds are ``None`` and your plot to pan/zoom as far as you want. If you only
     want to constrain one end of the plot, you can set min or max to None.
 
