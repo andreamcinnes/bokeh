@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 import numpy as np
 from bokeh.charts import HeatMap
 from bokeh.io import output_file, show, vplot, hplot
@@ -26,10 +26,10 @@ plot_default.y_range.bounds = 'auto'
 ## Plot where ranges are manually set
 
 ###### -- ranges set here -- ########
-x_range = Range1d(0, 3, bounds=(-1, 3.5, 1.5))
-y_range = Range1d(0, 3, bounds=(-0.5, 4, 1.5))
+x_range = Range1d(0, 3, bounds=(-1, 3.5), zoom_bounds=(1.5, 3))
+y_range = Range1d(0, 3, bounds=(-0.5, 4), zoom_bounds=(1.5, 3))
 ###### -- end -- ########
-plot_range = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min-range: 1.5")
+plot_range = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) zoom_bounds: (1.5, 3)")
 plot_range.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9)
 
 
@@ -47,8 +47,8 @@ plot_range_un.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9, color='#043A8D')
 ## Bounded on reversed ranges (except for y_max)
 
 ###### -- ranges set here -- ########
-x_range = Range1d(3, 0, bounds=(-1, 3.5, 1.5))
-y_range = Range1d(3, 0, bounds=(-0.5, 4, 1.5))
+x_range = Range1d(3, 0, bounds=(-1, 3.5), zoom_bounds=(1.5, None))
+y_range = Range1d(3, 0, bounds=(-0.5, 4), zoom_bounds=(1.5, None))
 ###### -- end -- ########
 plot_range_rev = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min_range:1.5 (reverse ranges)")
 plot_range_rev.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9, color='#8CBEDB')
@@ -100,7 +100,8 @@ google_y = GOOG['adj_close'][0:1000]
 ###### -- ranges set here -- ########
 x_range = Range1d(
     start=date(2000, 1, 1), end=date(2004, 12, 31),
-    bounds=(date(2001, 1, 1), date(2006, 12, 31), 1000*60*60*24*100)  # min_zoom 100 days
+    bounds=(date(2001, 1, 1), date(2006, 12, 31)),
+    zoom_bounds=(timedelta(100), timedelta(1000000)),
 )
 y_range = Range1d(start=00, end=40, bounds=(10, 60))
 y_range_extra = Range1d(start=300, end=700, bounds=(200, 1000))

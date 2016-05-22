@@ -1392,7 +1392,6 @@ class MinMaxBounds(Either):
     Bounds are provided as a tuple of ``(min, max)`` so regardless of whether your range is
     increasing or decreasing, the first item should be the minimum value of the range and the
     second item should be the maximum. Setting min > max will result in a ``ValueError``.
-    A minimum zoom level can be given as a third element: ``(min, max, min_range)``.
     
     Setting bounds to None will allow your plot to pan/zoom as far as you want. If you only
     want to constrain one end of the plot, you can set min or max to
@@ -1403,15 +1402,12 @@ class MinMaxBounds(Either):
             types = (
                 Auto,
                 Tuple(Float, Float),
-                Tuple(Float, Float, Float),
                 Tuple(Datetime, Datetime),
-                Tuple(Datetime, Datetime, Float),  # min_range in milisecs
             )
         else:
             types = (
                 Auto,
                 Tuple(Float, Float),
-                Tuple(Float, Float, Float),
             )
         super(MinMaxBounds, self).__init__(*types, default=default, help=help)
 
@@ -1428,6 +1424,46 @@ class MinMaxBounds(Either):
             raise ValueError('Invalid bounds: maximum smaller than minimum. Correct usage: bounds=(min, max)')
 
         return True
+
+
+class ZoomBounds(Either):
+    """ Accepts min and max zoom bounds for use with Ranges.
+
+    Bounds are provided as a tuple of ``(min_interval, max_interval)``.
+    Setting min > max will result in a ``ValueError``.
+    
+    Setting bounds to None will allow your plot to zoom as far as you want. If you only
+    want to constrain one end of the zooming, you can set min or max to
+    ``None`` e.g. ``DataRange1d(zoom_bounds=(None, 12))`` """
+
+    def __init__(self, accept_datetime=False, default=None, help=None):
+        if accept_datetime:
+            types = (
+                Tuple(Float, Float),
+                Tuple(TimeDelta, TimeDelta),
+            )
+        else:
+            types = (
+                Tuple(Float, Float),
+                Tuple(Float, Float),  # need Either for timedelta, so need stub
+            )
+        super(ZoomBounds, self).__init__(*types, default=default, help=help)
+
+    def validate(self, value):
+        super(ZoomBounds, self).validate(value)
+
+        if value is None:
+            pass
+
+        elif value[0] is None or value[1] is None:
+            pass
+
+        elif value[0] >= value[1]:
+            raise ValueError('Invalid bounds: maximum smaller than minimum. '
+                             'Correct usage: zoom_bounds=(min_interval, max_interval)')
+
+        return True
+
 
 
 class Align(PropertyDescriptor):
@@ -1565,6 +1601,36 @@ class Datetime(PropertyDescriptor):
         return value
         # Handled by serialization in protocol.py for now
 
+class TimeDelta(PropertyDescriptor):
+    """ TimeDelta type property.
+
+    """
+
+    def __init__(self, default=datetime.timedelta(), help=None):
+        super(TimeDelta, self).__init__(default=default, help=help)
+
+    def validate(self, value):
+        super(TimeDelta, self).validate(value)
+
+        timedelta_types = (datetime.timedelta,)
+        try:
+            import numpy as np
+            timedelta_types += (np.timedelta64,)
+        except ImportError:
+            pass
+
+        if (isinstance(value, timedelta_types)):
+            return
+
+        if pd and isinstance(value, (pd.Timedelta)):
+            return
+
+        raise ValueError("Expected a timedelta instance, got %r" % value)
+
+    def transform(self, value):
+        value = super(TimeDelta, self).transform(value)
+        return value
+        # Handled by serialization in protocol.py for now
 
 class RelativeDelta(Dict):
     """ RelativeDelta type property for time deltas.

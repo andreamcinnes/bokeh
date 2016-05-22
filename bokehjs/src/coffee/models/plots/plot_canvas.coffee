@@ -314,14 +314,8 @@ class PlotCanvasView extends Renderer.View
     if rng.get('bounds')?
       min = rng.get('bounds')[0]
       max = rng.get('bounds')[1]
-      min_range = rng.get('bounds')[2]  # max_range would be max-min
 
       if reversed
-        if min_range?  # min_range comes first; min/max override in case of conflict
-          too_much_range = min_range - Math.abs(range_info['end'] - range_info['start'])
-          if too_much_range > 0
-            range_info['end'] -= 0.5 * too_much_range
-            range_info['start'] += 0.5 * too_much_range
         if min?
           if min >= range_info['end']
             range_info['end'] = min
@@ -333,11 +327,6 @@ class PlotCanvasView extends Renderer.View
             if is_panning?
               range_info['end'] = rng.get('end')
       else
-        if min_range?
-          too_much_range = min_range - Math.abs(range_info['end'] - range_info['start'])
-          if too_much_range > 0
-            range_info['start'] -= 0.5 * too_much_range
-            range_info['end'] += 0.5 * too_much_range
         if min?
           if min >= range_info['start']
             range_info['start'] = min
@@ -348,6 +337,22 @@ class PlotCanvasView extends Renderer.View
             range_info['end'] = max
             if is_panning?
               range_info['start'] = rng.get('start')
+
+    if rng.get('zoom_bounds')?
+      min_interval = rng.get('zoom_bounds')[0]
+      max_interval = rng.get('zoom_bounds')[1]
+      current_interval = Math.abs(range_info['end'] - range_info['start'])
+      center = 0.5 * (rng.get('end') + rng.get('start'))
+      sign = if reversed then -1 else 1
+
+      if min_interval?
+        if current_interval < min_interval
+          range_info['start'] = center - sign * 0.5 * min_interval
+          range_info['end'] = center + sign * 0.5 * min_interval
+      if max_interval?
+        if current_interval > max_interval
+          range_info['start'] = center - sign * 0.5 * max_interval
+          range_info['end'] = center + sign * 0.5 * max_interval
 
     if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
       rng.have_updated_interactively = true
