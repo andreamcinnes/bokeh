@@ -68,7 +68,6 @@ class Range1d(Range):
         Range1d(start=0, end=1, bounds=(0, None))  # Maximum is unbounded, minimum bounded to 0
     """)
     
-    # todo: also below
     min_interval = Either(Float, TimeDelta, Int, default=None, help="""
     The level that the range is allowed to zoom in, expressed as the
     minimuim visible interval. If set to ``None`` (defaut), the minimum
@@ -144,7 +143,16 @@ class DataRange1d(DataRange):
     If you only want to constrain one end of the plot, you can set min or max to
     ``None`` e.g. ``DataRange1d(bounds=(None, 12))``
     """)
+    
+    min_interval = Float(default=None, help="""
+    The level that the range is allowed to zoom in, expressed as the
+    minimuim visible interval. If set to ``None`` (defaut), the minimum
+    interval is not bound.""")
 
+    max_interval = Float(default=None, help="""
+    The level that the range is allowed to zoom out, expressed as the
+    maximum visible interval.""")
+    
     flipped = Bool(default=False, help="""
     Whether the range should be "flipped" from its normal direction when
     auto-ranging.
@@ -251,6 +259,15 @@ class FactorRange(Range):
         The plot will display the chart with only the factors ["apples", "peaches", "bananas"] (in that order)
         and the plot will not pan left of apples or right of bananas.
     """)
+    
+    min_interval = Int(default=None, help="""
+    The level that the range is allowed to zoom in, expressed as the
+    minimuim visible categories. If set to ``None`` (defaut), the minimum
+    interval is not bound.""")
+
+    max_interval = Int(default=None, help="""
+    The level that the range is allowed to zoom out, expressed as the
+    maximum visible categories.""")
 
     def __init__(self, *args, **kwargs):
         if args and "factors" in kwargs:
