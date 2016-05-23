@@ -1426,46 +1426,6 @@ class MinMaxBounds(Either):
         return True
 
 
-class ZoomBounds(Either):
-    """ Accepts min and max zoom bounds for use with Ranges.
-
-    Bounds are provided as a tuple of ``(min_interval, max_interval)``.
-    Setting min > max will result in a ``ValueError``.
-    
-    Setting bounds to None will allow your plot to zoom as far as you want. If you only
-    want to constrain one end of the zooming, you can set min or max to
-    ``None`` e.g. ``DataRange1d(zoom_bounds=(None, 12))`` """
-
-    def __init__(self, accept_datetime=False, default=None, help=None):
-        if accept_datetime:
-            types = (
-                Tuple(Float, Float),
-                Tuple(TimeDelta, TimeDelta),
-            )
-        else:
-            types = (
-                Tuple(Float, Float),
-                Tuple(Float, Float),  # need Either for timedelta, so need stub
-            )
-        super(ZoomBounds, self).__init__(*types, default=default, help=help)
-
-    def validate(self, value):
-        super(ZoomBounds, self).validate(value)
-
-        if value is None:
-            pass
-
-        elif value[0] is None or value[1] is None:
-            pass
-
-        elif value[0] >= value[1]:
-            raise ValueError('Invalid bounds: maximum smaller than minimum. '
-                             'Correct usage: zoom_bounds=(min_interval, max_interval)')
-
-        return True
-
-
-
 class Align(PropertyDescriptor):
     pass
 

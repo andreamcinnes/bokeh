@@ -9,8 +9,8 @@ from ..model import Model
 from ..core.enums import StartEnd
 from ..core.properties import abstract
 from ..core.properties import (
-    Auto, Bool, Int, Float, String, Datetime, Instance, List, Either, Enum,
-    MinMaxBounds, ZoomBounds,
+    Auto, Bool, Int, Float, String, Datetime, TimeDelta, Instance, List,
+    Either, Enum, MinMaxBounds,
 )
 from .callbacks import Callback
 from .renderers import Renderer
@@ -67,24 +67,16 @@ class Range1d(Range):
         Range1d(0, 1, bounds='auto')  # Auto-bounded to 0 and 1 (Default behavior)
         Range1d(start=0, end=1, bounds=(0, None))  # Maximum is unbounded, minimum bounded to 0
     """)
-    # todo: also below
-    zoom_bounds = ZoomBounds(accept_datetime=True, default=None, help="""
-    The zoom level that the range is allowed to provide - typically used to prevent
-    the user from zooming too far in/out for the data to make sense.
-
-    If set to ``None`` (defaut), the zooming is not bounded, except
-    perhaps by the bounds set by the ``bounds`` property.
-
-    Bounds are provided as a tuple of ``(min_interval, max_interval)``
-    expressing the minimum and maximum zoom level in terms of the
-    interval shown on screen. Setting min > max will result in a
-    ``ValueError``.
     
-    Examples:
+    # todo: also below
+    min_interval = Either(Float, TimeDelta, Int, default=None, help="""
+    The level that the range is allowed to zoom in, expressed as the
+    minimuim visible interval. If set to ``None`` (defaut), the minimum
+    interval is not bound.""")
 
-        Range1d(0, 100, zoom_bounds=(1, 100))  # Zoom restricted at both ends
-        Range1d(0, 100, zoom_bounds=(1, None))  # Only zooming in is restricted
-    """)
+    max_interval = Either(Float, TimeDelta, Int, default=None, help="""
+    The level that the range is allowed to zoom out, expressed as the
+    maximum visible interval.""")
 
     def __init__(self, *args, **kwargs):
         if args and ('start' in kwargs or 'end' in kwargs):
