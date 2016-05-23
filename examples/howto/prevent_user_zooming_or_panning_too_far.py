@@ -27,9 +27,9 @@ plot_default.y_range.bounds = 'auto'
 
 ###### -- ranges set here -- ########
 x_range = Range1d(0, 3, bounds=(-1, 3.5), min_interval=1.5)
-y_range = Range1d(0, 3, bounds=(-0.5, 4), min_interval=2)
+y_range = Range1d(0, 3, bounds=(-0.5, 4), min_interval=1.5)
 ###### -- end -- ########
-plot_range = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min_interval: 1.5")
+plot_range = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min_interval:1.5")
 plot_range.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9)
 
 
@@ -37,9 +37,9 @@ plot_range.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9)
 
 ###### -- ranges set here -- ########
 x_range = Range1d(0, 3, max_interval=4)
-y_range = Range1d(0, 3, bounds=(None, 4), max_interval=4)
+y_range = Range1d(0, 3, bounds=(None, 3), max_interval=4)
 ###### -- end -- ########
-plot_range_un = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Unbounded (except for y_max=4 and max_interval=4)")
+plot_range_un = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Unbounded (except for y_max=3 and max_interval=4)")
 plot_range_un.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9, color='#043A8D')
 
 

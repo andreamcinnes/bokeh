@@ -57,8 +57,7 @@ class Range1d(Range):
     Bounds are provided as a tuple of ``(min, max)`` so regardless of whether your range is
     increasing or decreasing, the first item should be the minimum value of the range and the
     second item should be the maximum. Setting min > max will result in a ``ValueError``.
-    A minimum zoom level can be given as a third element: ``(min, max, min_range)``.
-    
+
     By default, bounds are ``None`` and your plot to pan/zoom as far as you want. If you only
     want to constrain one end of the plot, you can set min or max to None.
 
@@ -67,15 +66,15 @@ class Range1d(Range):
         Range1d(0, 1, bounds='auto')  # Auto-bounded to 0 and 1 (Default behavior)
         Range1d(start=0, end=1, bounds=(0, None))  # Maximum is unbounded, minimum bounded to 0
     """)
-    
+
     min_interval = Either(Float, TimeDelta, Int, default=None, help="""
     The level that the range is allowed to zoom in, expressed as the
-    minimuim visible interval. If set to ``None`` (defaut), the minimum
-    interval is not bound.""")
+    minimum visible interval. If set to ``None`` (defaut), the minimum
+    interval is not bound. Can be a timedelta. """)
 
     max_interval = Either(Float, TimeDelta, Int, default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
-    maximum visible interval.""")
+    maximum visible interval. Can be a timedelta. """)
 
     def __init__(self, *args, **kwargs):
         if args and ('start' in kwargs or 'end' in kwargs):
@@ -143,16 +142,16 @@ class DataRange1d(DataRange):
     If you only want to constrain one end of the plot, you can set min or max to
     ``None`` e.g. ``DataRange1d(bounds=(None, 12))``
     """)
-    
+
     min_interval = Float(default=None, help="""
     The level that the range is allowed to zoom in, expressed as the
-    minimuim visible interval. If set to ``None`` (defaut), the minimum
+    minimum visible interval. If set to ``None`` (defaut), the minimum
     interval is not bound.""")
 
     max_interval = Float(default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
     maximum visible interval.""")
-    
+
     flipped = Bool(default=False, help="""
     Whether the range should be "flipped" from its normal direction when
     auto-ranging.
@@ -259,10 +258,10 @@ class FactorRange(Range):
         The plot will display the chart with only the factors ["apples", "peaches", "bananas"] (in that order)
         and the plot will not pan left of apples or right of bananas.
     """)
-    
+
     min_interval = Int(default=None, help="""
     The level that the range is allowed to zoom in, expressed as the
-    minimuim visible categories. If set to ``None`` (defaut), the minimum
+    minimum visible categories. If set to ``None`` (defaut), the minimum
     interval is not bound.""")
 
     max_interval = Int(default=None, help="""

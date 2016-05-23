@@ -1392,7 +1392,7 @@ class MinMaxBounds(Either):
     Bounds are provided as a tuple of ``(min, max)`` so regardless of whether your range is
     increasing or decreasing, the first item should be the minimum value of the range and the
     second item should be the maximum. Setting min > max will result in a ``ValueError``.
-    
+
     Setting bounds to None will allow your plot to pan/zoom as far as you want. If you only
     want to constrain one end of the plot, you can set min or max to
     ``None`` e.g. ``DataRange1d(bounds=(None, 12))`` """

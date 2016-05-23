@@ -340,16 +340,16 @@ class PlotCanvasView extends Renderer.View
 
     min_interval = rng.get('min_interval')
     max_interval = rng.get('max_interval')
-    if min_interval || max_interval
+    if min_interval? || max_interval?
       current_interval = Math.abs(range_info['end'] - range_info['start'])
       center = 0.5 * (rng.get('end') + rng.get('start'))
       sign = if reversed then -1 else 1
 
-      if min_interval?
+      if min_interval > 0
         if current_interval < min_interval
           range_info['start'] = center - sign * 0.5 * min_interval
           range_info['end'] = center + sign * 0.5 * min_interval
-      if max_interval?
+      if max_interval > 0
         if current_interval > max_interval
           range_info['start'] = center - sign * 0.5 * max_interval
           range_info['end'] = center + sign * 0.5 * max_interval
