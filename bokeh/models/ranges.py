@@ -261,12 +261,12 @@ class FactorRange(Range):
 
     min_interval = Int(default=None, help="""
     The level that the range is allowed to zoom in, expressed as the
-    minimum visible categories. If set to ``None`` (defaut), the minimum
-    interval is not bound.""")
+    minimum number of visible categories. If set to ``None`` (defaut),
+    the minimum interval is not bound.""")
 
     max_interval = Int(default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
-    maximum visible categories.""")
+    maximum number of visible categories.""")
 
     def __init__(self, *args, **kwargs):
         if args and "factors" in kwargs:
