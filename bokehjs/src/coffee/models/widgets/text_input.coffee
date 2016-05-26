@@ -25,7 +25,8 @@ class TextInputView extends Widget.View
 
   render: () ->
     super()
-    @$el.html(@template(@model.attributes))
+    @$el.empty()
+    @$el.append(@template(@model.attributes))
     # TODO - This 35 is a hack we should be able to compute it
     @$el.find('input').height(@mget('height') - 35)
     return @

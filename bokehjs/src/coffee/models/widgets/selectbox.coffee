@@ -29,7 +29,7 @@ class SelectView extends Widget.View
     super()
     @$el.empty()
     html = @template(@model.attributes)
-    @$el.html(html)
+    @$el.append(html)
     return @
 
 
