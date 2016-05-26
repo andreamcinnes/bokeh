@@ -37,7 +37,7 @@ class WidgetBoxView extends LayoutDOM.View
     # We have to add on 10px because widgets have a margin at the top.
     for own key, child_view of @child_views
       height += child_view.el.scrollHeight + 10
-    return height + 10
+    return height + 5 * @model.children.length
 
   get_width: () ->
     width = 0
@@ -85,3 +85,4 @@ class WidgetBox extends LayoutDOM.Model
 
 module.exports =
   Model: WidgetBox
+  View: WidgetBoxView
