@@ -25,7 +25,7 @@ class TabsView extends Widget.View
 
     tabs = @mget('tabs')
     active = @mget('active')
-    children = @mget('children')
+    children = @mget('tabs_children')
 
     build_views(@views, children)
 
@@ -61,7 +61,7 @@ class Tabs extends Widget.Model
 
   initialize: (options) ->
     super(options)
-    @children = (tab.get("child") for tab in @tabs)
+    @tabs_children = (tab.get("child") for tab in @tabs)
 
   @define {
       tabs:     [ p.Array,   [] ]
@@ -70,11 +70,11 @@ class Tabs extends Widget.Model
     }
 
   @internal {
-      children: [ p.Array,   [] ]
+      tabs_children: [ p.Array,   [] ]
   }
 
   get_layoutable_children: () ->
-    return @get('children')
+    return @get('tabs_children')
 
   get_edit_variables: () ->
     edit_variables = super()
