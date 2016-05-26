@@ -1,17 +1,11 @@
-LayoutDOM = require "../layouts/layout_dom"
+WidgetBox = require "../layouts/widget_box"
 
 
-class WidgetView extends LayoutDOM.View
+class WidgetView extends WidgetBox.View
   className: "bk-widget"
 
-  render: () ->
-    # LayoutDOM.View sets up lots of helpful things, but 
-    # it's render method is not suitable for widgets - who 
-    # should provide their own.
-    null
 
-
-class Widget extends LayoutDOM.Model
+class Widget extends WidgetBox.Model
   type: "Widget"
   default_view: WidgetView
 
