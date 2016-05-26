@@ -60,12 +60,16 @@ class LayoutDOMView extends BokehView
         width = @model.width
       else
         width = @get_width()
-        @model.width = width
+        if width > 20
+          @model.width = width
+
       if @model.height?
         height = @model.height
+        console.log(height)
       else
         height = @get_height()
-        @model.height = height
+        if height > 10
+          @model.height = height
 
       s.suggest_value(@model._width, width)
       s.suggest_value(@model._height, height)

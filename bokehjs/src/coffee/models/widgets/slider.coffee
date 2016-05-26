@@ -31,7 +31,8 @@ class SliderView extends Widget.View
     @render()
 
   render: () ->
-    super()
+    if @model.responsive != ['width_ar']
+      super()
     max = @mget('end')
     min = @mget('start')
     step = @mget('step') or ((max - min)/50)

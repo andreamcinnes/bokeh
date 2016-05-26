@@ -11,21 +11,43 @@ class BoxView extends LayoutDOM.View
 
   get_height: () ->
     children = @model.get_layoutable_children()
-    child_heights = _.map(children, ((child) -> child._height._value))
+
+    # look-up the dynamic heights
+    dynamic_child_heights = _.map(children, ((child) -> child._height._value))
     if @model._horizontal
-      height = _.reduce(child_heights, ((a, b) -> Math.max(a, b)))
+      dynamic_height = _.reduce(dynamic_child_heights, ((a, b) -> Math.max(a, b)))
     else
-      height = _.reduce(child_heights, ((a, b) -> a + b))
-    return height
+      dynamic_height = _.reduce(dynamic_child_heights, ((a, b) -> a + b))
+
+    # look-up the static heights
+    static_child_heights = _.map(children, ((child) -> child.height))
+    if @model._horizontal
+      static_height = _.reduce(static_child_heights, ((a, b) -> Math.max(a, b)))
+    else
+      static_height = _.reduce(static_child_heights, ((a, b) -> a + b))
+
+    #console.log("#{@model} - height - #{dynamic_height} x #{static_height}")
+    return Math.max(dynamic_height, static_height)
 
   get_width: () ->
     children = @model.get_layoutable_children()
-    child_widths = _.map(children, ((child) -> child._width._value))
+
+    # look-up the dynamic widths
+    dynamic_child_widths = _.map(children, ((child) -> child._width._value))
     if @model._horizontal
-      width = _.reduce(child_widths, ((a, b) -> a + b))
+      dynamic_width = _.reduce(dynamic_child_widths, ((a, b) -> a + b))
     else
-      width = _.reduce(child_widths, ((a, b) -> Math.max(a, b)))
-    return width
+      dynamic_width = _.reduce(dynamic_child_widths, ((a, b) -> Math.max(a, b)))
+
+    # look-up the static widths
+    static_child_widths = _.map(children, ((child) -> child.width))
+    if @model._horizontal
+      static_width = _.reduce(static_child_widths, ((a, b) -> a + b))
+    else
+      static_width = _.reduce(static_child_widths, ((a, b) -> Math.max(a, b)))
+
+    #console.log("#{@model} - width - #{dynamic_width} x #{static_width}")
+    return Math.max(dynamic_width, static_width)
 
 
 class Box extends LayoutDOM.Model

@@ -33,14 +33,21 @@ class WidgetBoxView extends LayoutDOM.View
       })
 
   get_height: () ->
-    height = 0
+    if @model.responsive in ['fixed', 'width_ar']
+      height = @el.scrollHeight
+    else
+      height = 0
     # We have to add on 10px because widgets have a margin at the top.
     for own key, child_view of @child_views
       height += child_view.el.scrollHeight + 10
+    console.log("#{@model} - height = #{height}")
     return height + 5 * @model.children.length
 
   get_width: () ->
-    width = 0
+    if @model.responsive in ['fixed', 'width_ar']
+      width = @el.scrollWidth + 20
+    else
+      width = 0
     for own key, child_view of @child_views
       # Take the max width of all the children as the constrainer.
       child_width = child_view.el.scrollWidth
