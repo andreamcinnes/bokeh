@@ -341,18 +341,20 @@ class PlotCanvasView extends Renderer.View
     min_interval = rng.get('min_interval')
     max_interval = rng.get('max_interval')
     if min_interval? || max_interval?
+      old_interval = Math.abs(rng.get('end') - rng.get('start'))
       new_interval = Math.abs(range_info['end'] - range_info['start'])
-      center = 0.5 * (rng.get('end') + rng.get('start'))
-      sign = if reversed then -1 else 1
-
-      if min_interval > 0
-        if new_interval < min_interval
-          range_info['start'] = center - sign * 0.5 * min_interval
-          range_info['end'] = center + sign * 0.5 * min_interval
-      if max_interval > 0
-        if new_interval > max_interval
-          range_info['start'] = center - sign * 0.5 * max_interval
-          range_info['end'] = center + sign * 0.5 * max_interval
+      
+      if min_interval > 0 and new_interval < min_interval
+          # Apply zoom, but scaled to the amount that is still valid
+          weight = (old_interval - min_interval) / (old_interval - new_interval)
+          weight = Math.max(0.0, Math.min(1.0, weight))
+          range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
+          range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+      if max_interval > 0 and new_interval > max_interval
+          weight = (max_interval - old_interval) / (new_interval - old_interval)
+          weight = Math.max(0.0, Math.min(1.0, weight))
+          range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
+          range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
 
     if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
       rng.have_updated_interactively = true

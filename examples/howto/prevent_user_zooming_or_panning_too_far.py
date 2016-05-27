@@ -29,7 +29,7 @@ plot_default.y_range.bounds = 'auto'
 x_range = Range1d(0, 3, bounds=(-1, 3.5), min_interval=1.5)
 y_range = Range1d(0, 3, bounds=(-0.5, 4), min_interval=1.5)
 ###### -- end -- ########
-plot_range = figure(tools='pan, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min_interval:1.5")
+plot_range = figure(tools='pan, box_zoom, wheel_zoom, reset', x_range=x_range, y_range=y_range, title="Manual bounds x:(-1, 3.5) y:(-0.5, 4) min_interval:1.5")
 plot_range.rect(x=[1, 2], y=[1, 1], width=0.9, height=0.9)
 
 
