@@ -304,64 +304,67 @@ class PlotCanvasView extends Renderer.View
   reset_selection: () ->
     @update_selection(null)
 
-  _update_single_range: (rng, range_info, is_panning) ->
-    # Is this a reversed range?
-    reversed = if rng.get('start') > rng.get('end') then true else false
+  _update_ranges_individually: (range_info_iter) ->
+    for [rng, range_info] in range_info_iter
+      # Get weight and scale if necessary
+      weight = @_get_weight_to_constrain_range(rng, range_info)
+      if weight < 1
+        range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
+        range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+      # Apply range
+      if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
+        rng.have_updated_interactively = true
+        rng.set(range_info)
+        rng.get('callback')?.execute(rng)
 
-    # Prevent range from going outside limits
-    # Also ensure that range keeps the same delta when panning
+  _update_ranges_together: (range_info_iter) ->
+    # Get weight needed to scale the diff of the range to honour limits
+    weight = 1.0
+    for [rng, range_info] in range_info_iter
+      weight = Math.min(weight, @_get_weight_to_constrain_range(rng, range_info))
+    # Apply shared weight to all ranges
+    if weight < 1
+      for [rng, range_info] in range_info_iter
+        range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
+        range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+    # Apply range
+    for [rng, range_info] in range_info_iter
+      if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
+        rng.have_updated_interactively = true
+        rng.set(range_info)
+        rng.get('callback')?.execute(rng)
+
+  _get_weight_to_constrain_range: (rng, range_info) ->
+    weights = []
 
     if rng.get('bounds')?
-      min = rng.get('bounds')[0]
-      max = rng.get('bounds')[1]
-
-      if reversed
-        if min?
-          if min >= range_info['end']
-            range_info['end'] = min
-            if is_panning?
-              range_info['start'] = rng.get('start')
-        if max?
-          if max <= range_info['start']
-            range_info['start'] = max
-            if is_panning?
-              range_info['end'] = rng.get('end')
-      else
-        if min?
-          if min >= range_info['start']
-            range_info['start'] = min
-            if is_panning?
-              range_info['end'] = rng.get('end')
-        if max?
-          if max <= range_info['end']
-            range_info['end'] = max
-            if is_panning?
-              range_info['start'] = rng.get('start')
+        min = rng.get('bounds')[0]
+        max = rng.get('bounds')[1]
+        if min? and min >= range_info['start']
+            weights.push(Math.abs(rng.get('start') - min) / Math.abs(rng.get('start') - range_info['start'] ))
+        if max? and max <= range_info['start']
+            weights.push(Math.abs(rng.get('start') - max) / Math.abs(rng.get('start') - range_info['start'] ))
+        if min? and min >= range_info['end']
+            weights.push(Math.abs(rng.get('end') - min) / Math.abs(rng.get('end') - range_info['end']))
+        if max? and max <= range_info['end']
+            weights.push(Math.abs(rng.get('end') - max) / Math.abs(rng.get('end') - range_info['end']))
 
     min_interval = rng.get('min_interval')
     max_interval = rng.get('max_interval')
     if min_interval? || max_interval?
       old_interval = Math.abs(rng.get('end') - rng.get('start'))
       new_interval = Math.abs(range_info['end'] - range_info['start'])
-      
       if min_interval > 0 and new_interval < min_interval
-          # Apply zoom, but scaled to the amount that is still valid
-          weight = (old_interval - min_interval) / (old_interval - new_interval)
-          weight = Math.max(0.0, Math.min(1.0, weight))
-          range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
-          range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+          weights.push((old_interval - min_interval) / (old_interval - new_interval))
       if max_interval > 0 and new_interval > max_interval
-          weight = (max_interval - old_interval) / (new_interval - old_interval)
-          weight = Math.max(0.0, Math.min(1.0, weight))
-          range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
-          range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+          weights.push((max_interval - old_interval) / (new_interval - old_interval))
 
-    if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
-      rng.have_updated_interactively = true
-      rng.set(range_info)
-      rng.get('callback')?.execute(rng)
+    if weights.length == 0
+       return 1
+    weight = Math.max.apply(null, weights)
+    return Math.max(0.0, Math.min(1.0, weight))
 
-  update_range: (range_info, is_panning) ->
+  update_range: (range_info, is_panning, is_scrolling) ->
     @pause
     if not range_info?
       for name, rng of @frame.get('x_ranges')
@@ -370,10 +373,14 @@ class PlotCanvasView extends Renderer.View
         rng.reset()
       @update_dataranges()
     else
+      range_info_iter = []
       for name, rng of @frame.get('x_ranges')
-        @_update_single_range(rng, range_info.xrs[name], is_panning)
+        range_info_iter.push([rng, range_info.xrs[name]])
       for name, rng of @frame.get('y_ranges')
-        @_update_single_range(rng, range_info.yrs[name], is_panning)
+        range_info_iter.push([rng, range_info.yrs[name]])
+      if is_scrolling
+        @_update_ranges_together(range_info_iter)
+      @_update_ranges_individually(range_info_iter)
     @unpause()
 
   reset_range: () ->
