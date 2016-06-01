@@ -74,7 +74,8 @@ class Range1d(Range):
 
     max_interval = Either(Float, TimeDelta, Int, default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
-    maximum visible interval. Can be a timedelta. """)
+    maximum visible interval. Can be a timedelta. Note that ``bounds`` can
+    impose an implicit constraint on the maximum interval as well. """)
 
     def __init__(self, *args, **kwargs):
         if args and ('start' in kwargs or 'end' in kwargs):
@@ -150,7 +151,8 @@ class DataRange1d(DataRange):
 
     max_interval = Float(default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
-    maximum visible interval.""")
+    maximum visible interval. Note that ``bounds`` can impose an
+    implicit constraint on the maximum interval as well.""")
 
     flipped = Bool(default=False, help="""
     Whether the range should be "flipped" from its normal direction when
@@ -266,7 +268,8 @@ class FactorRange(Range):
 
     max_interval = Int(default=None, help="""
     The level that the range is allowed to zoom out, expressed as the
-    maximum number of visible categories.""")
+    maximum number of visible categories. Note that ``bounds`` can
+    impose an implicit constraint on the maximum interval as well.""")
 
     def __init__(self, *args, **kwargs):
         if args and "factors" in kwargs:
