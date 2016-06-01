@@ -304,65 +304,92 @@ class PlotCanvasView extends Renderer.View
   reset_selection: () ->
     @update_selection(null)
 
-  _update_ranges_individually: (range_info_iter) ->
-    for [rng, range_info] in range_info_iter
-      # Get weight and scale if necessary
-      weight = @_get_weight_to_constrain_range(rng, range_info)
-      if weight < 1
-        range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
-        range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
-      # Apply range
-      if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
-        rng.have_updated_interactively = true
-        rng.set(range_info)
-        rng.get('callback')?.execute(rng)
-
   _update_ranges_together: (range_info_iter) ->
     # Get weight needed to scale the diff of the range to honour limits
+    # This is in some cases applied as a pre-processing step to _update_single_range
     weight = 1.0
     for [rng, range_info] in range_info_iter
-      weight = Math.min(weight, @_get_weight_to_constrain_range(rng, range_info))
+      weight = Math.min(weight, @_get_weight_to_constrain_interval(rng, range_info))
     # Apply shared weight to all ranges
     if weight < 1
       for [rng, range_info] in range_info_iter
         range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
         range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
-    # Apply range
+
+  _update_ranges_individually: (range_info_iter, is_panning, is_scrolling) ->
+
     for [rng, range_info] in range_info_iter
+      # Is this a reversed range?
+      reversed = if rng.get('start') > rng.get('end') then true else false
+
+      # Limit range interval first. Note that for scroll events,
+      # the interval has already been limited for all ranges simultaneously
+      if not is_scrolling
+        weight = @_get_weight_to_constrain_interval(rng, range_info)
+        if weight < 1
+            range_info['start'] = weight * range_info['start'] + (1-weight) * rng.get('start')
+            range_info['end'] = weight * range_info['end'] + (1-weight) * rng.get('end')
+
+      # Prevent range from going outside limits
+      # Also ensure that range keeps the same delta when panning/scrolling
+      if rng.get('bounds')?
+        min = rng.get('bounds')[0]
+        max = rng.get('bounds')[1]
+        new_interval = Math.abs(range_info['end'] - range_info['start'])
+
+        if reversed
+          if min?
+            if min >= range_info['end']
+              range_info['end'] = min
+              if is_panning? or is_scrolling?
+                range_info['start'] = min + new_interval
+          if max?
+            if max <= range_info['start']
+              range_info['start'] = max
+              if is_panning? or is_scrolling?
+                range_info['end'] = max - new_interval
+        else
+          if min?
+            if min >= range_info['start']
+              range_info['start'] = min
+              if is_panning? or is_scrolling?
+                range_info['end'] = min + new_interval
+          if max?
+            if max <= range_info['end']
+              range_info['end'] = max
+              if is_panning? or is_scrolling?
+                range_info['start'] = max - new_interval
+
       if rng.get('start') != range_info['start'] or rng.get('end') != range_info['end']
         rng.have_updated_interactively = true
         rng.set(range_info)
         rng.get('callback')?.execute(rng)
 
-  _get_weight_to_constrain_range: (rng, range_info) ->
-    weights = []
+  _get_weight_to_constrain_interval: (rng, range_info) ->
+      # Get the weight by which a range-update can be applied
+      # to still honour the interval limits (as well as the implicit
+      # max interval imposed by the bounds)
+      min_interval = rng.get('min_interval')
+      max_interval = rng.get('max_interval')
+      weight = 1.0
 
-    if rng.get('bounds')?
-        min = rng.get('bounds')[0]
-        max = rng.get('bounds')[1]
-        if min? and min >= range_info['start']
-            weights.push(Math.abs(rng.get('start') - min) / Math.abs(rng.get('start') - range_info['start'] ))
-        if max? and max <= range_info['start']
-            weights.push(Math.abs(rng.get('start') - max) / Math.abs(rng.get('start') - range_info['start'] ))
-        if min? and min >= range_info['end']
-            weights.push(Math.abs(rng.get('end') - min) / Math.abs(rng.get('end') - range_info['end']))
-        if max? and max <= range_info['end']
-            weights.push(Math.abs(rng.get('end') - max) / Math.abs(rng.get('end') - range_info['end']))
+      # Express bounds as a max_interval. By doing this, the application of
+      # bounds and interval limits can be applied independent from each-other.
+      if rng.get('bounds')?
+        [min, max] = rng.get('bounds')
+        if min? and max?
+          max_interval2 = Math.abs(rng.get('bounds')[0] - rng.get('bounds')[1])
+          max_interval = if max_interval? then Math.min(max_interval, max_interval2) else max_interval2
 
-    min_interval = rng.get('min_interval')
-    max_interval = rng.get('max_interval')
-    if min_interval? || max_interval?
-      old_interval = Math.abs(rng.get('end') - rng.get('start'))
-      new_interval = Math.abs(range_info['end'] - range_info['start'])
-      if min_interval > 0 and new_interval < min_interval
-          weights.push((old_interval - min_interval) / (old_interval - new_interval))
-      if max_interval > 0 and new_interval > max_interval
-          weights.push((max_interval - old_interval) / (new_interval - old_interval))
-
-    if weights.length == 0
-       return 1
-    weight = Math.max.apply(null, weights)
-    return Math.max(0.0, Math.min(1.0, weight))
+      if min_interval? || max_interval?
+        old_interval = Math.abs(rng.get('end') - rng.get('start'))
+        new_interval = Math.abs(range_info['end'] - range_info['start'])
+        if min_interval > 0 and new_interval < min_interval
+            weight = (old_interval - min_interval) / (old_interval - new_interval)
+        if max_interval > 0 and new_interval > max_interval
+            weight = (max_interval - old_interval) / (new_interval - old_interval)
+        weight = Math.max(0.0, Math.min(1.0, weight))
+      return weight
 
   update_range: (range_info, is_panning, is_scrolling) ->
     @pause
@@ -380,7 +407,7 @@ class PlotCanvasView extends Renderer.View
         range_info_iter.push([rng, range_info.yrs[name]])
       if is_scrolling
         @_update_ranges_together(range_info_iter)
-      @_update_ranges_individually(range_info_iter)
+      @_update_ranges_individually(range_info_iter, is_panning, is_scrolling)
     @unpause()
 
   reset_range: () ->
